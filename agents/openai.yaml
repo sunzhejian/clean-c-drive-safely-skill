@@ -1,0 +1,4 @@
+interface:
+  display_name: "C Drive Safe Cleanup"
+  short_description: "Audit, migrate, clean, and verify C drive space"
+  default_prompt: "Use $clean-c-drive-safely to audit C drive usage, safely move caches off C, and verify affected apps."
