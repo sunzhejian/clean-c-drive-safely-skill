@@ -1,24 +1,26 @@
 param(
-  [string]$MigrationLog,
+  [string]$MigrationLog = "",
+  [string]$SystemDrive = "C",
   [double]$TargetFreeGB = 0,
-  [switch]$CheckDocker,
-  [switch]$CheckArduino,
-  [switch]$CheckWsl,
-  [switch]$CheckNode,
-  [switch]$CheckPython
+  [string[]]$Checks = @(),
+  [switch]$RefreshUserPath
 )
 
 $ErrorActionPreference = "Continue"
 
-Write-Host "== Drives =="
-$drives = Get-PSDrive C,D,E
+if ($RefreshUserPath) {
+  $env:Path = [Environment]::GetEnvironmentVariable("Path", "User") + ";" + [Environment]::GetEnvironmentVariable("Path", "Machine")
+}
+
+Write-Host "== Fixed drives =="
+$drives = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -ne $null -and $_.Free -ne $null }
 $drives | Select-Object Name,@{n="UsedGB";e={[math]::Round($_.Used/1GB,2)}},@{n="FreeGB";e={[math]::Round($_.Free/1GB,2)}} | Format-Table -AutoSize
 if ($TargetFreeGB -gt 0) {
-  $c = $drives | Where-Object Name -eq "C"
-  if (($c.Free / 1GB) -lt $TargetFreeGB) {
-    Write-Warning ("C free space below target: {0:N2} GB < {1:N2} GB" -f ($c.Free / 1GB), $TargetFreeGB)
+  $system = $drives | Where-Object Name -eq $SystemDrive.TrimEnd(":")
+  if ($system -and (($system.Free / 1GB) -ge $TargetFreeGB)) {
+    Write-Host ("Target met: {0} has {1:N2} GB free >= {2:N2} GB" -f $SystemDrive, ($system.Free / 1GB), $TargetFreeGB)
   } else {
-    Write-Host ("C free space target met: {0:N2} GB >= {1:N2} GB" -f ($c.Free / 1GB), $TargetFreeGB)
+    Write-Warning ("Target not met: {0} free space is below {1:N2} GB" -f $SystemDrive, $TargetFreeGB)
   }
 }
 
@@ -45,24 +47,52 @@ if ($MigrationLog) {
   $rows | Where-Object Status -eq "error" | Select-Object Source,GB,Note | Format-Table -AutoSize
 }
 
-Write-Host "`n== Tool checks =="
-if ($CheckPython) {
-  python --version
-  python -m pip --version
+function Invoke-Check {
+  param([string]$Name)
+  Write-Host "`n== Check: $Name =="
+  switch ($Name.ToLowerInvariant()) {
+    "python" {
+      python --version
+      python -m pip --version
+      Get-Command python -All | Select-Object Source,Version | Format-Table -AutoSize
+    }
+    "node" {
+      node --version
+      npm --version
+      npm config get cache
+    }
+    "wsl" {
+      wsl --list --verbose
+    }
+    "docker" {
+      docker info --format "Docker Server={{.ServerVersion}} Containers={{.Containers}} Driver={{.Driver}}"
+      docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+    }
+    "arduino" {
+      arduino-cli version
+      arduino-cli core list
+    }
+    "git" {
+      git --version
+      git config --global --get user.name
+    }
+    "rust" {
+      cargo --version
+      rustup show active-toolchain
+    }
+    default {
+      Write-Warning "Unknown named check '$Name'. Add a project-specific validation command manually."
+    }
+  }
 }
-if ($CheckNode) {
-  node --version
-  npm --version
-  npm config get cache
+
+$normalizedChecks = foreach ($check in $Checks) {
+  foreach ($part in ($check -split ",")) {
+    $trimmed = $part.Trim()
+    if ($trimmed) { $trimmed }
+  }
 }
-if ($CheckWsl) {
-  wsl --list --verbose
-}
-if ($CheckDocker) {
-  docker info --format "Docker Server={{.ServerVersion}} Containers={{.Containers}} Driver={{.Driver}}"
-  docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
-}
-if ($CheckArduino) {
-  arduino-cli version
-  arduino-cli core list
+
+foreach ($check in $normalizedChecks) {
+  Invoke-Check $check
 }

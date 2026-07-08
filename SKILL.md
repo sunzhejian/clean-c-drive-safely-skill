@@ -1,77 +1,80 @@
 ---
 name: clean-c-drive-safely
-description: Safely audit and free Windows C drive space by classifying large directories, moving cache/application data to D or E with junctions, cleaning low-risk temporary files, and validating affected software. Use when the user asks to clean C drive, move caches off C, migrate WSL/Docker/Arduino/Python/user app data away from C, preserve application compatibility after cleanup, or reach a target free-space threshold without unsafe deletion.
+description: Mature Windows disk-space remediation workflow for safely auditing a full system drive, classifying risk, migrating cache or application data to another volume with junctions, deleting only explicitly approved disposable files, and validating affected software. Use when a user asks to clean C drive, free Windows system-drive space, move caches or app data off the system drive, migrate WSL/Docker/package-manager/developer-tool data, or preserve app compatibility after storage cleanup on any Windows PC.
 ---
 
 # Clean C Drive Safely
 
 ## Overview
 
-Free C drive space with a conservative, auditable workflow: inspect first, migrate with junctions when safe, delete only clearly disposable data, and verify the software that might have been affected.
+Use a conservative, repeatable workflow for Windows system-drive cleanup. Treat every machine as different: discover the user's drives, apps, active processes, and target free-space goal before changing anything.
 
-## Workflow
+## Operating Model
 
-1. Capture the target free-space goal and current disk state with `Get-PSDrive`.
-2. Run a read-only audit before changing files:
+1. Establish scope:
+   - Confirm the system drive, target free space, destination volume, and whether the user permits deletion or only migration.
+   - Prefer a destination with enough free space and a simple root such as `X:\DevCaches` or `X:\AppDataOffload`.
+2. Audit read-only first:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/audit-c-drive.ps1 -Drive C -Top 80
+powershell -ExecutionPolicy Bypass -File scripts/audit-c-drive.ps1 `
+  -SystemDrive C `
+  -Top 80 `
+  -OutputDir X:\CleanupLogs
 ```
 
-3. Classify candidates into:
-   - Safe to delete: old temp files, crash dumps, recycle bin when user explicitly allows it, screenshots when user explicitly allows it, stale build/cache files.
-   - Safer to migrate: application caches, package caches, browser/dev-tool caches, user-level tool data.
-   - Special handling: WSL distributions, Docker Desktop data, Arduino data/cache, Python PATH, package managers.
-   - Do not touch without explicit instruction: `.codex`, documents/projects, source repositories, system folders, active databases, and unknown app data.
-4. For migration, do a dry run first, then execute only selected paths:
+3. Classify candidates with `references/windows-cleanup-policy.md`.
+4. Migrate app data only after a dry run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/migrate-to-cache-volume.ps1 `
-  -DestinationRoot E:\DevCaches\MigratedC `
-  -SourcePaths C:\Users\me\AppData\Local\SomeCache `
-  -LogDir E:\DevCaches\MigrationLogs
-
-powershell -ExecutionPolicy Bypass -File scripts/migrate-to-cache-volume.ps1 `
-  -DestinationRoot E:\DevCaches\MigratedC `
-  -SourcePaths C:\Users\me\AppData\Local\SomeCache `
-  -LogDir E:\DevCaches\MigrationLogs `
-  -Execute
+  -SourceDrive C `
+  -DestinationRoot X:\AppDataOffload `
+  -SourcePaths C:\Users\me\AppData\Local\ExampleCache `
+  -LogDir X:\CleanupLogs
 ```
 
-5. Validate every moved path and the important apps:
+Run again with `-Execute` only after reviewing dry-run output.
+5. Delete files only when the user explicitly approves the category or pattern:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/remove-approved-files.ps1 `
+  -Roots C:\Users\me\Pictures,C:\Users\me\Downloads `
+  -NamePatterns "*Screenshot*","*screen shot*","*snip*" `
+  -Extensions .png,.jpg,.jpeg,.webp `
+  -LogDir X:\CleanupLogs
+```
+
+Run again with `-Execute` only after reviewing the deletion log preview.
+6. Validate the cleanup and affected software:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/validate-cleanup.ps1 `
-  -MigrationLog E:\DevCaches\MigrationLogs\c-drive-migration_YYYYMMDD_HHMMSS.csv `
-  -TargetFreeGB 100
+  -SystemDrive C `
+  -TargetFreeGB 100 `
+  -MigrationLog X:\CleanupLogs\drive-migration_YYYYMMDD_HHMMSS.csv `
+  -Checks python,node,wsl,docker
 ```
 
 ## Hard Rules
 
-- Default to read-only scans until the candidate list is understood.
-- Never move or delete `.codex` unless the user explicitly names it and confirms the risk.
-- Never recursively delete or move a computed path unless its resolved absolute source and destination have been printed and verified to be inside the intended roots.
-- Do not follow junctions/reparse points while measuring or deleting; otherwise a C cleanup can accidentally touch data already migrated to D or E.
-- Skip a directory if a running process executable path is inside it.
-- Prefer migration plus a junction over deletion for application data. Preserve the original C path for compatibility.
-- Keep logs of migrated and deleted items outside C, for example `E:\DevCaches\MigrationLogs`.
-- After changing PATH, distinguish registry/user PATH from the current process PATH. Refresh the process environment for validation when needed.
-- If an operation requires administrator privileges and the current shell is not elevated, report that limitation instead of forcing it.
-
-## Special Cases
-
-- Docker Desktop: keep Docker WSL data together. Validate with `docker info`, `docker ps`, and `wsl -l -v`. Do not move `Program Files\Docker` without explicit instruction.
-- WSL: verify distro base paths in `HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss`; export/import only when a real move is needed. Test `wsl -d <name> --exec sh -lc "whoami; pwd"`.
-- Arduino: keep Arduino body, data, downloads, and CLI cache on the intended non-C drive. Validate `arduino-cli version`, `arduino-cli core list`, and a small compile.
-- Python: global `python` should normally point to the general Python install, not a project virtual environment. Project venvs should be invoked explicitly or activated per project.
-- Browser and editor caches: close the app when possible. If not possible, migrate only inactive subdirectories or skip.
+- Start read-only. Do not mutate files until the largest space users and risks are understood.
+- Do not follow junctions or reparse points while measuring, deleting, or selecting cleanup candidates.
+- Never recursively delete application directories. Delete only approved files, and migrate app data with a junction when compatibility matters.
+- Never move or delete tool state for the current agent, credentials, source repositories, documents, active databases, or unknown business data unless the user explicitly confirms that exact path.
+- Skip migration when a running process executable path is inside the source path.
+- Log every migration and deletion outside the system drive.
+- If an operation needs administrator privileges, report the limitation and use non-admin alternatives first.
+- After PATH or environment changes, distinguish persistent user/machine environment from the current process environment and refresh the process PATH before validation.
 
 ## References
 
-Read `references/windows-cleanup-policy.md` before deleting anything beyond temporary files, screenshots explicitly allowed by the user, or crash dumps.
+- Read `references/windows-cleanup-policy.md` before deletion or migration.
+- Read `references/application-validation-playbook.md` when cleanup touches developer tools, virtualized runtimes, package managers, browsers, creative tools, games, or databases.
 
 ## Scripts
 
-- `scripts/audit-c-drive.ps1`: read-only inventory for large root/user/app-data directories and known cleanup candidates.
-- `scripts/migrate-to-cache-volume.ps1`: dry-run-by-default migration helper that moves selected C paths under a non-C root and creates junctions.
-- `scripts/validate-cleanup.ps1`: verifies migration logs, free-space target, and common tools after cleanup.
+- `scripts/audit-c-drive.ps1`: read-only inventory of drives, large directories, known disposable candidates, and running processes.
+- `scripts/migrate-to-cache-volume.ps1`: dry-run-by-default migration helper that moves selected system-drive paths to another volume and creates junctions.
+- `scripts/remove-approved-files.ps1`: dry-run-by-default file deletion helper for explicitly approved patterns such as screenshots, crash dumps, or stale temp files.
+- `scripts/validate-cleanup.ps1`: validates free-space targets, migration logs, and selected app/tool checks.
