@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Sample validation matrix</title>
+  <desc id="desc">A validation matrix for a sample cleanup showing pass states for free space, junctions, Python, Node, WSL, Docker, and app-specific checks.</desc>
+  <rect width="960" height="560" fill="#f9fafb"/>
+  <text x="40" y="54" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#111827">Sample Validation Matrix</text>
+  <text x="40" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#4b5563">A cleanup is not complete until affected paths and tools still work.</text>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="54" y="126" width="852" height="48" rx="8" fill="#111827"/>
+    <text x="86" y="157" font-size="14" font-weight="700" fill="#ffffff">Validation area</text>
+    <text x="420" y="157" font-size="14" font-weight="700" fill="#ffffff">Example check</text>
+    <text x="800" y="157" font-size="14" font-weight="700" fill="#ffffff">Status</text>
+    <g font-size="14" fill="#374151">
+      <rect x="54" y="184" width="852" height="48" fill="#ffffff" stroke="#e5e7eb"/>
+      <text x="86" y="214" font-weight="700">Free-space target</text>
+      <text x="420" y="214">System drive free space >= requested GB</text>
+      <circle cx="817" cy="207" r="12" fill="#16a34a"/><path d="M811 207 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="214" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="232" width="852" height="48" fill="#f8fafc" stroke="#e5e7eb"/>
+      <text x="86" y="262" font-weight="700">Migration integrity</text>
+      <text x="420" y="262">Source is junction, destination exists</text>
+      <circle cx="817" cy="255" r="12" fill="#16a34a"/><path d="M811 255 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="262" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="280" width="852" height="48" fill="#ffffff" stroke="#e5e7eb"/>
+      <text x="86" y="310" font-weight="700">Python or CLI runtime</text>
+      <text x="420" y="310">Version command and package manager respond</text>
+      <circle cx="817" cy="303" r="12" fill="#16a34a"/><path d="M811 303 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="310" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="328" width="852" height="48" fill="#f8fafc" stroke="#e5e7eb"/>
+      <text x="86" y="358" font-weight="700">Package caches</text>
+      <text x="420" y="358">Cache path points to intended non-system drive</text>
+      <circle cx="817" cy="351" r="12" fill="#16a34a"/><path d="M811 351 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="358" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="376" width="852" height="48" fill="#ffffff" stroke="#e5e7eb"/>
+      <text x="86" y="406" font-weight="700">WSL or VM runtime</text>
+      <text x="420" y="406">Runtime lists instances and boots a shell</text>
+      <circle cx="817" cy="399" r="12" fill="#16a34a"/><path d="M811 399 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="406" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="424" width="852" height="48" fill="#f8fafc" stroke="#e5e7eb"/>
+      <text x="86" y="454" font-weight="700">Container engine</text>
+      <text x="420" y="454">Engine info and running container list return</text>
+      <circle cx="817" cy="447" r="12" fill="#16a34a"/><path d="M811 447 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="454" fill="#166534" font-weight="700">PASS</text>
+
+      <rect x="54" y="472" width="852" height="48" fill="#ffffff" stroke="#e5e7eb"/>
+      <text x="86" y="502" font-weight="700">App-specific checks</text>
+      <text x="420" y="502">Only apps touched by cleanup are smoke-tested</text>
+      <circle cx="817" cy="495" r="12" fill="#16a34a"/><path d="M811 495 l5 5 l10 -12" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="840" y="502" fill="#166534" font-weight="700">PASS</text>
+    </g>
+  </g>
+</svg>

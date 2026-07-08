@@ -1,0 +1,10 @@
+metric,value,unit,note
+free_space_before,58,GB,anonymized sample
+target_free_space,100,GB,user requested target
+free_space_after,104,GB,post-validation sample
+migrated_data,34,GB,kept original paths through junctions
+deleted_data,7,GB,only approved disposable files
+skipped_data,9,GB,locked or unclear risk
+protected_data,6,GB,credentials projects or agent state
+migration_entries,33,count,source junction and destination verified
+validation_checks,7,count,all sample checks passed

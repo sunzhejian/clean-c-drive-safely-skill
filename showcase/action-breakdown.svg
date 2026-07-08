@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Sample action breakdown</title>
+  <desc id="desc">A stacked horizontal bar and summary cards showing migrated, deleted, skipped, and protected data classes in an example cleanup.</desc>
+  <rect width="960" height="520" fill="#ffffff"/>
+  <text x="40" y="54" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#111827">Sample Action Breakdown</text>
+  <text x="40" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#4b5563">The skill separates impact from risk: most space is migrated, only approved disposable files are deleted.</text>
+  <rect x="70" y="142" width="820" height="54" rx="10" fill="#e5e7eb"/>
+  <rect x="70" y="142" width="498" height="54" rx="10" fill="#2563eb"/>
+  <rect x="568" y="142" width="102" height="54" fill="#f59e0b"/>
+  <rect x="670" y="142" width="132" height="54" fill="#94a3b8"/>
+  <rect x="802" y="142" width="88" height="54" rx="10" fill="#dc2626"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <text x="319" y="174">Migrated 34 GB</text>
+    <text x="619" y="174">Deleted 7 GB</text>
+    <text x="736" y="174">Skipped 9 GB</text>
+    <text x="846" y="174">Protected 6 GB</text>
+  </g>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g>
+      <rect x="70" y="250" width="180" height="120" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+      <text x="92" y="285" font-size="32" font-weight="800" fill="#1d4ed8">34 GB</text>
+      <text x="92" y="315" font-size="16" font-weight="700" fill="#1e3a8a">Migrated</text>
+      <text x="92" y="344" font-size="13" fill="#475569">Preserve original paths</text>
+    </g>
+    <g>
+      <rect x="280" y="250" width="180" height="120" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+      <text x="302" y="285" font-size="32" font-weight="800" fill="#b45309">7 GB</text>
+      <text x="302" y="315" font-size="16" font-weight="700" fill="#92400e">Deleted</text>
+      <text x="302" y="344" font-size="13" fill="#475569">Only approved files</text>
+    </g>
+    <g>
+      <rect x="490" y="250" width="180" height="120" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="512" y="285" font-size="32" font-weight="800" fill="#475569">9 GB</text>
+      <text x="512" y="315" font-size="16" font-weight="700" fill="#334155">Skipped</text>
+      <text x="512" y="344" font-size="13" fill="#475569">Locked or unclear risk</text>
+    </g>
+    <g>
+      <rect x="700" y="250" width="190" height="120" rx="10" fill="#fef2f2" stroke="#fecaca"/>
+      <text x="722" y="285" font-size="32" font-weight="800" fill="#b91c1c">6 GB</text>
+      <text x="722" y="315" font-size="16" font-weight="700" fill="#991b1b">Protected</text>
+      <text x="722" y="344" font-size="13" fill="#475569">Credentials/projects/state</text>
+    </g>
+  </g>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">
+    <circle cx="82" cy="426" r="6" fill="#2563eb"/>
+    <text x="96" y="431">Migration keeps app compatibility through junctions.</text>
+    <circle cx="82" cy="456" r="6" fill="#f59e0b"/>
+    <text x="96" y="461">Deletion is limited to user-approved disposable file classes.</text>
+    <circle cx="82" cy="486" r="6" fill="#dc2626"/>
+    <text x="96" y="491">Protected data is reported, not touched.</text>
+  </g>
+</svg>
